@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NutriLyze — Smart Nutrition Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- ── TOAST ──────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── NOTIFICATION CONTAINER ────────────────────────────── -->
+<div class="notif-container" id="notifContainer"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-wrap">
+    <div class="auth-hero">
+      <h1>Track your<br/><span>nutrition</span><br/>like a pro.</h1>
+      <p>NutriLyze uses real USDA food data to give you accurate insights about what you eat every day.</p>
+      <div class="auth-hero-points">
+        <div class="auth-hero-point"><div class="dot"></div>Search from millions of real foods</div>
+        <div class="auth-hero-point"><div class="dot"></div>Auto-fetched macros — no manual entry</div>
+        <div class="auth-hero-point"><div class="dot"></div>Smart daily targets based on your goal</div>
+        <div class="auth-hero-point"><div class="dot"></div>Water & meal reminders</div>
+      </div>
+    </div>
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="logo-icon">🥗</div>
+        <h1>Nutri<span>Lyze</span></h1>
+        <p>Your personal nutrition companion</p>
+      </div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••"/>
+        </div>
+        <div class="msg" id="loginMsg"></div>
+        <button class="btn btn-primary" onclick="handleLogin()">Login →</button>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerForm" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="regUsername" placeholder="laila123"/>
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="regFullname" placeholder="Laila Ahmed"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="Min 6 characters"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="regGender">
+              <option value="">other</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="regDob"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Activity Level</label>
+          <select id="regActivity">
+            <option value="sedentary">Sedentary (little/no exercise)</option>
+            <option value="light">Light (1-3 days/week)</option>
+            <option value="moderate" selected>Moderate (3-5 days/week)</option>
+            <option value="active">Active (6-7 days/week)</option>
+            <option value="very_active">Very Active (athlete)</option>
+          </select>
+        </div>
+        <div class="msg" id="registerMsg"></div>
+        <button class="btn btn-primary" onclick="handleRegister()">Create Account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     GOAL WIZARD
+══════════════════════════════════════════════════════════ -->
+<div id="goalWizard">
+  <div class="wizard-box">
+    <h2>🎯 Set Your Goal</h2>
+    <p>Tell us about yourself so we can calculate your ideal daily targets</p>
+
+    <div class="goal-options">
+      <div class="goal-option" onclick="selectGoal('lose')" id="goal-lose">
+        <div class="g-icon">🔥</div>
+        <div class="g-label">Lose Weight</div>
+        <div class="g-sub">Caloric deficit</div>
+      </div>
+      <div class="goal-option" onclick="selectGoal('maintain')" id="goal-maintain">
+        <div class="g-icon">⚖️</div>
+        <div class="g-label">Maintain</div>
+        <div class="g-sub">Stay balanced</div>
+      </div>
+      <div class="goal-option" onclick="selectGoal('gain')" id="goal-gain">
+        <div class="g-icon">💪</div>
+        <div class="g-label">Gain Weight</div>
+        <div class="g-sub">Caloric surplus</div>
+      </div>
+    </div>
+
+    <div class="wizard-inputs">
+      <div class="form-group">
+        <label>Current Weight (kg)</label>
+        <input type="number" id="wWeight" placeholder="e.g. 60" oninput="calcWizard()"/>
+      </div>
+    <div class="form-group">
+    <label>Height</label>
+    <div style="display:flex;gap:8px">
+        <input type="number" id="wFeet" placeholder="Feet" min="1" max="8" oninput="calcWizard()" style="width:50%"/>
+        <input type="number" id="wInches" placeholder="Inches" min="0" max="11" oninput="calcWizard()" style="width:50%"/>
+    </div>
+</div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="wAge" placeholder="e.g. 22" oninput="calcWizard()"/>
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="wGender" onchange="calcWizard()">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Ideal Weight Box — shows when height is entered -->
+    <div class="ideal-weight-box" id="idealWeightBox">
+      <h4>📏 Ideal Weight for Your Height</h4>
+      <p id="idealWeightText"></p>
+    </div>
+
+    <!-- Calculated results -->
+    <div class="wizard-result" id="wizardResult">
+      <h4>📊 Your Daily Targets</h4>
+      <div class="wizard-result-grid">
+        <div class="wr-item">
+          <div class="wr-val" id="wr-cal">—</div>
+          <div class="wr-label">Calories</div>
+        </div>
+        <div class="wr-item">
+          <div class="wr-val" id="wr-protein">—</div>
+          <div class="wr-label">Protein (g)</div>
+        </div>
+        <div class="wr-item">
+          <div class="wr-val" id="wr-bmi">—</div>
+          <div class="wr-label">Your BMI</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveGoal()">Save & Start Tracking →</button>
+    <button class="btn btn-secondary" style="margin-top:10px;width:100%" onclick="skipWizard()">Skip for now</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     APP SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="appScreen">
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <h2>Nutri<span>Lyze</span></h2>
+    <div style="width:32px"></div>
+  </div>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <div class="app-layout">
+    <!-- ── SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <h2>🥗 Nutri<span>Lyze</span></h2>
+        <p>Smart Nutrition Tracker</p>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <p id="sidebarName">Loading...</p>
+        <small id="sidebarGoalBadge">No goal set</small>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-label">Main</div>
+        <div class="nav-item active" onclick="navTo('dashboard')">
+          <span class="icon">🏠</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="navTo('logFood')">
+          <span class="icon">🍽️</span> Log Food
+        </div>
+        <div class="nav-item" onclick="navTo('search')">
+          <span class="icon">🔍</span> Search Foods
+        </div>
+        <div class="nav-item" onclick="navTo('water')">
+          <span class="icon">💧</span> Water Log
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Insights</div>
+        <div class="nav-item" onclick="navTo('measurements')">
+          <span class="icon">📏</span> Body Stats
+        </div>
+        <div class="nav-section" id="adminSection" style="display:none">
+    <div class="nav-label">Admin</div>
+    <div class="nav-item" onclick="navTo('admin')">
+        <span class="icon">⚙️</span> Admin Panel
+    </div>
+</div>
+        <div class="nav-item" onclick="navTo('profile')">
+          <span class="icon">👤</span> Profile
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="logout-btn" onclick="handleLogout()">🚪 Logout</button>
+      </div>
+    </aside>
+    
+
+    <!-- ── MAIN CONTENT ─────────────────────────────────── -->
+    <main class="main">
+
+      <!-- ═══════ PAGE: DASHBOARD ═══════ -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <h2 id="dashGreeting">Good morning! 👋</h2>
+          <p id="dashDate" style="color:var(--muted);font-size:14px;margin-top:4px"></p>
+        </div>
+
+        <!-- Goal Banner -->
+        <div class="goal-banner" id="goalBanner" style="display:none">
+          <div class="goal-banner-icon" id="goalBannerIcon">🎯</div>
+          <div>
+            <h3>Your Goal</h3>
+            <p id="goalBannerText">—</p>
+            <div class="goal-banner-sub" id="goalBannerSub"></div>
+          </div>
+          <div class="goal-stats" id="goalStats"></div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="card-grid grid-4" style="margin-bottom:18px">
+          <div class="stat-card">
+            <div class="stat-icon-wrap orange">🔥</div>
+            <div class="stat-label">Calories Today</div>
+            <div class="stat-value"><span id="dashCal">0</span><span class="stat-unit"> kcal</span></div>
+            <div class="stat-sub" id="dashCalGoal">Goal: — kcal</div>
+            <div class="progress-bar"><div class="progress-fill orange" id="dashCalBar" style="width:0%"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap green">💪</div>
+            <div class="stat-label">Protein</div>
+            <div class="stat-value"><span id="dashProt">0</span><span class="stat-unit"> g</span></div>
+            <div class="stat-sub" id="dashProtGoal">Goal: — g</div>
+            <div class="progress-bar"><div class="progress-fill green" id="dashProtBar" style="width:0%"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap blue">💧</div>
+            <div class="stat-label">Water</div>
+            <div class="stat-value"><span id="dashWater">0</span><span class="stat-unit"> ml</span></div>
+            <div class="stat-sub">Goal: 2500 ml</div>
+            <div class="progress-bar"><div class="progress-fill blue" id="dashWaterBar" style="width:0%"></div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap yellow">🍽️</div>
+            <div class="stat-label">Meals Logged</div>
+            <div class="stat-value"><span id="dashMeals">0</span></div>
+            <div class="stat-sub">Today</div>
+          </div>
+        </div>
+
+        <!-- Macro chart + Today's meals -->
+        <div class="card-grid grid-2">
+          <div class="card">
+            <h3>Today's Macros</h3>
+            <div class="macro-chart-wrap">
+              <canvas id="macroCanvas" width="160" height="160"></canvas>
+              <div class="macro-chart-center">
+                <div class="macro-chart-kcal" id="macroKcal">0</div>
+                <div class="macro-chart-label">kcal</div>
+              </div>
+            </div>
+            <div class="macro-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#e76f51"></div>
+                <div class="legend-name">Carbs</div>
+                <div class="legend-bar-wrap"><div class="legend-bar" id="carbsBar" style="background:#e76f51;width:0%"></div></div>
+                <div class="legend-val"><span id="dashCarbs">0</span>g</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#52b788"></div>
+                <div class="legend-name">Protein</div>
+                <div class="legend-bar-wrap"><div class="legend-bar" id="protBar" style="background:#52b788;width:0%"></div></div>
+                <div class="legend-val"><span id="dashProtLeg">0</span>g</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#f4a261"></div>
+                <div class="legend-name">Fat</div>
+                <div class="legend-bar-wrap"><div class="legend-bar" id="fatBar" style="background:#f4a261;width:0%"></div></div>
+                <div class="legend-val"><span id="dashFat">0</span>g</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Today's Meals</h3>
+            <div id="dashMealList">
+              <div class="empty-state">
+                <div class="empty-icon">🍽️</div>
+                <p>No meals logged yet.<br/>Go to <b>Log Food</b> to add your first meal!</p>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" style="margin-top:14px;width:100%" onclick="navTo('logFood')">+ Log Food</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ PAGE: LOG FOOD ═══════ -->
+      <div class="page" id="page-logFood">
+        <div class="page-header">
+          <h2>🍽️ Log Food</h2>
+          <p>Search for any food — macros will be fetched automatically</p>
+        </div>
+        <div class="card-grid grid-2">
+          <div class="card">
+            <h3>Search & Add Food</h3>
+
+            <!-- Inline search -->
+            <div class="form-group">
+              <label>Search Food (USDA Database)</label>
+              <div class="inline-search-wrap">
+                <input type="text" id="logFoodSearch" placeholder="e.g. chicken biryani, banana, egg..."
+                  oninput="onLogFoodType()" autocomplete="off"/>
+                <div class="inline-search-results" id="logFoodResults"></div>
+              </div>
+            </div>
+
+            <!-- Auto-filled food info banner -->
+            <div class="food-info-banner" id="foodInfoBanner">
+              <h4 id="foodInfoName">—</h4>
+              <div class="fib-grid">
+                <div><div class="fib-val" id="fib-cal">—</div><div class="fib-label">Calories</div></div>
+                <div><div class="fib-val" id="fib-prot">—</div><div class="fib-label">Protein g</div></div>
+                <div><div class="fib-val" id="fib-carbs">—</div><div class="fib-label">Carbs g</div></div>
+                <div><div class="fib-val" id="fib-fat">—</div><div class="fib-label">Fat g</div></div>
+              </div>
+            </div>
+
+            <div class="log-form" style="margin-top:14px">
+              <div class="form-group" style="margin-bottom:0">
+                <label>Meal Type</label>
+                <select id="logMealType">
+                  <option value="Breakfast">🌅 Breakfast</option>
+                  <option value="Lunch">☀️ Lunch</option>
+                  <option value="Dinner">🌙 Dinner</option>
+                  <option value="Snack">🍎 Snack</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Hidden fields filled automatically -->
+            <input type="hidden" id="logFoodName"/>
+            <input type="hidden" id="logCalories"/>
+            <input type="hidden" id="logProtein"/>
+            <input type="hidden" id="logCarbs"/>
+            <input type="hidden" id="logFat"/>
+            <input type="hidden" id="logFiber"/>
+            <input type="hidden" id="logSugar"/>
+            <input type="hidden" id="logSodium"/>
+            <input type="hidden" id="logServing"/>
+
+            <div class="msg" id="logFoodMsg" style="margin-top:12px"></div>
+            <button class="btn btn-primary" style="margin-top:14px" onclick="submitLogFood()" id="logFoodBtn" disabled>
+              Log This Food →
+            </button>
+          </div>
+
+          <!-- Today's log -->
+          <div class="card">
+            <h3>Today's Log</h3>
+            <div id="todayLogList">
+              <div class="loading-state">
+                <div class="spinner"></div>
+                <p style="margin-top:10px;font-size:12px">Loading...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ PAGE: SEARCH FOODS ═══════ -->
+      <div class="page" id="page-search">
+        <div class="page-header">
+          <h2>🔍 Search Foods</h2>
+          <p>Explore the USDA food database — click any food to log it directly</p>
+        </div>
+        <div class="card">
+          <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search any food — e.g. apple, rice, chicken breast..."
+              onkeydown="if(event.key==='Enter') doSearch()"/>
+            <button onclick="doSearch()">Search</button>
+          </div>
+          <div class="search-filter-tabs">
+            <button class="filter-tab active" onclick="setFilter('all',this)">All</button>
+            <button class="filter-tab" onclick="setFilter('Foundation',this)">Foundation</button>
+            <button class="filter-tab" onclick="setFilter('Branded',this)">Branded</button>
+            <button class="filter-tab" onclick="setFilter('SR Legacy',this)">SR Legacy</button>
+          </div>
+          <div id="searchResults">
+            <div class="empty-state">
+              <div class="empty-icon">🔍</div>
+              <p>Type a food name above and press Search</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ PAGE: WATER ═══════ -->
+      <div class="page" id="page-water">
+        <div class="page-header">
+          <h2>💧 Water Log</h2>
+          <p>Stay hydrated — aim for 2500ml per day</p>
+        </div>
+        <div class="card-grid grid-2">
+          <div class="card" style="text-align:center">
+            <h3>Today's Water</h3>
+            <div class="water-big" id="waterBig">0</div>
+            <div class="water-sub">ml out of <b>2500</b> ml</div>
+            <div class="progress-bar" style="margin-bottom:20px">
+              <div class="progress-fill blue" id="waterProgress" style="width:0%"></div>
+            </div>
+            <div class="water-quick-btns">
+              <button class="water-quick-btn" onclick="logWater(150)">☕ 150ml</button>
+              <button class="water-quick-btn" onclick="logWater(250)">🥤 250ml</button>
+              <button class="water-quick-btn" onclick="logWater(500)">🍶 500ml</button>
+              <button class="water-quick-btn" onclick="logWater(750)">🧴 750ml</button>
+            </div>
+            <p class="water-tip" style="margin-top:16px">
+              💡 Drink a glass of water when you wake up<br/>
+              💡 Carry a 500ml bottle and refill 5x/day<br/>
+              💡 Drink a glass before every meal
+            </p>
+          </div>
+          <div class="card">
+            <h3>Log Custom Amount</h3>
+            <div class="form-group">
+              <label>Amount (ml)</label>
+              <input type="number" id="customWater" placeholder="e.g. 350"/>
+            </div>
+            <button class="btn btn-primary" onclick="logWater()">+ Add Water</button>
+            <div class="msg" id="waterMsg" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ PAGE: MEASUREMENTS ═══════ -->
+      <div class="page" id="page-measurements">
+        <div class="page-header">
+          <h2>📏 Body Stats</h2>
+          <p>Track your weight, height and BMI over time</p>
+        </div>
+        <div class="card-grid grid-2">
+          <div class="card">
+            <h3>Add Today's Measurements</h3>
+            <div class="form-group">
+              <label>Weight (kg)</label>
+              <input type="number" id="mWeight" placeholder="e.g. 60.5"/>
+            </div>
+            <div class="form-group">
+              <label>Height (cm)</label>
+              <input type="number" id="mHeight" placeholder="e.g. 165"/>
+            </div>
+            <div class="form-group">
+              <label>Body Fat % (optional)</label>
+              <input type="number" id="mBodyFat" placeholder="e.g. 22"/>
+            </div>
+            <div class="msg" id="measMsg"></div>
+            <button class="btn btn-primary" onclick="saveMeasurement()">Save Measurement →</button>
+          </div>
+          <div class="card">
+            <h3>BMI</h3>
+            <div class="stat-value" style="font-size:48px;text-align:center;margin-bottom:10px">
+              <span id="bmiVal" style="color:var(--accent)">—</span>
+            </div>
+            <div class="stat-sub" style="text-align:center;margin-bottom:16px" id="bmiCat">Enter measurements to calculate</div>
+            <div class="bmi-bar">
+              <div class="bmi-needle" id="bmiNeedle" style="left:0%"></div>
+            </div>
+            <div class="bmi-labels">
+              <span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>
+            </div>
+            <!-- Ideal weight info card -->
+            <div class="ideal-weight-box" id="measIdealBox" style="margin-top:16px">
+              <h4>📏 Ideal Weight Range</h4>
+              <p id="measIdealText"></p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>History</h3>
+          <div id="measHistory">
+            <div class="loading-state"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ PAGE: PROFILE ═══════ -->
+    
+      <div class="page" id="page-profile">
+        <div class="page-header">
+          <h2>👤 Profile</h2>
+          <p>Your account details</p>
+        </div>
+        <div class="card-grid grid-2">
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="profile-card-top">
+              <div class="profile-avatar-big" id="profAvatar">?</div>
+              <h3 id="profName">—</h3>
+              <p id="profEmail">—</p>
+            </div>
+            <div style="padding:20px">
+              <div class="info-row"><span class="info-label">Username</span><span class="info-val" id="profUsername">—</span></div>
+              <div class="info-row"><span class="info-label">Gender</span><span class="info-val" id="profGender">—</span></div>
+              <div class="info-row"><span class="info-label">Date of Birth</span><span class="info-val" id="profDob">—</span></div>
+              <div class="info-row"><span class="info-label">Activity Level</span><span class="info-val" id="profActivity">—</span></div>
+              <div class="info-row"><span class="info-label">Member Since</span><span class="info-val" id="profSince">—</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Your Goal Summary</h3>
+            <div id="profGoalSummary">
+              <div class="empty-state">
+                <div class="empty-icon">🎯</div>
+                <p>No goal set yet.<br/><button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="document.getElementById('goalWizard').classList.add('show')">Set Goal Now</button></p>
+              </div>
+                 </div>
+    <button class="btn btn-secondary" style="margin-top:15px;width:100%" 
+        onclick="document.getElementById('goalWizard').classList.add('show')">
+        🎯 Change Goal
+    </button>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+<!-- ADMIN PAGE -->
+       <div class="page" id="page-admin" style="padding:20px">
+    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h2>⚙️ Admin Panel</h2>
+            <p>All registered users</p>
+        </div>
+        <button class="btn btn-secondary" onclick="handleLogout()" 
+            style="display:flex; align-items:center; gap:8px; color:#c1121f; border-color:#c1121f; width:auto;">
+            🚪 Logout
+        </button>
+    </div>
+    <div class="card">
+        <table style="width:100%;border-collapse:collapse" id="adminUserTable">
+            <thead>
+                <tr style="background:#f0f0f0">
+                    <th style="padding:10px;text-align:left">ID</th>
+                    <th style="padding:10px;text-align:left">Username</th>
+                    <th style="padding:10px;text-align:left">Email</th>
+                    <th style="padding:10px;text-align:left">Name</th>
+                    <th style="padding:10px;text-align:left">Gender</th>
+                    <th style="padding:10px;text-align:left">Role</th>
+                </tr>
+            </thead>
+            <tbody id="adminUserBody">
+                <tr><td colspan="6" style="text-align:center;padding:20px">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+  
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+ 
+  // URL hash se tab switch karo
+  window.addEventListener('load', function() {
+    const hash = window.location.hash;
+    if (hash === '#register') {
+      switchAuthTab('register');
+    } else if (hash === '#login') {
+      switchAuthTab('login');
+    }
+  });
+
+const API = 'http://localhost:5050';
+
+// ── STATE ──────────────────────────────────────────────────
+let token = localStorage.getItem('nl_token') || null;
+let currentUser = JSON.parse(localStorage.getItem('nl_user') || 'null');
+let userGoal = JSON.parse(localStorage.getItem('nl_goal') || 'null');
+let selectedGoalType = null;
+let searchTimeout = null;
+let logFoodTimeout = null;
+let searchFilter = 'all';
+let allSearchResults = [];
+let notifTimers = [];
+
+// ── INIT ───────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (token && currentUser) {
+    showApp();
+  } else {
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+  // Set date immediately
+  setDashDate();
+});
+
+function setDashDate() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('dashDate').textContent = now.toLocaleDateString('en-PK', opts);
+  // Greeting based on time
+  const h = now.getHours();
+  const name = currentUser?.full_name?.split(' ')[0] || currentUser?.user_name || 'there';
+  let g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('dashGreeting').textContent = `${g}, ${name}! 👋`;
+}
+
+// ── TOAST ──────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show ${type}`;
+  setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ── NOTIFICATIONS (proper alert style) ────────────────────
+function showNotif(title, msg, type='goal') {
+  const container = document.getElementById('notifContainer');
+  const div = document.createElement('div');
+  div.className = `notif-alert ${type}`;
+  const icons = { water:'💧', meal:'🍽️', goal:'🎯', warn:'⚠️' };
+  div.innerHTML = `
+    <div class="notif-icon">${icons[type]||'🔔'}</div>
+    <div class="notif-body">
+      <div class="notif-title">${title}</div>
+      <div class="notif-msg">${msg}</div>
+    </div>
+    <button class="notif-close" onclick="dismissNotif(this)">✕</button>
+  `;
+  container.appendChild(div);
+  // Auto dismiss after 6s
+  const timer = setTimeout(() => dismissNotif(div.querySelector('.notif-close')), 6000);
+  notifTimers.push(timer);
+}
+
+function dismissNotif(btn) {
+  const alert = btn.closest ? btn.closest('.notif-alert') : btn;
+  alert.classList.add('hiding');
+  setTimeout(() => alert.remove(), 300);
+}
+
+// ── NOTIFICATION SCHEDULER ─────────────────────────────────
+function startNotificationScheduler() {
+  // Water reminder every 90 min
+  setInterval(() => {
+    showNotif('💧 Drink Water!', 'You should drink a glass of water right now. Stay hydrated!', 'water');
+  }, 90 * 60 * 1000);
+
+  // Meal reminders
+  scheduleMealReminders();
+
+  // First water reminder after 10s (demo)
+  setTimeout(() => {
+    showNotif('💧 Hydration Reminder', 'Welcome back! Don\'t forget to drink water regularly.', 'water');
+  }, 10000);
+}
+
+function scheduleMealReminders() {
+  const now = new Date();
+  const schedule = [
+    { hour: 8,  min: 0,  msg: 'Time for breakfast! Log your morning meal.', label:'🌅 Breakfast Time' },
+    { hour: 13, min: 0,  msg: 'Lunch time! Don\'t forget to log what you eat.', label:'☀️ Lunch Time' },
+    { hour: 19, min: 30, msg: 'Dinner time! Keep tracking your nutrition.', label:'🌙 Dinner Time' },
+  ];
+  schedule.forEach(s => {
+    const target = new Date();
+    target.setHours(s.hour, s.min, 0, 0);
+    const diff = target - now;
+    if (diff > 0) {
+      setTimeout(() => showNotif(s.label, s.msg, 'meal'), diff);
+    }
+  });
+}
+
+// ── AUTH ───────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'));
+  });
+  document.getElementById('loginForm').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const msg   = document.getElementById('loginMsg');
+  if (!email || !pass) return showMsg(msg, 'Fill in all fields', 'error');
+  try {
+    const res  = await fetch(`${API}/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password:pass}) });
+    const data = await res.json();
+    if (!res.ok) return showMsg(msg, data.error, 'error');
+    token = data.token;
+    currentUser = data.user;
+    localStorage.setItem('nl_token', token);
+    localStorage.setItem('nl_user', JSON.stringify(currentUser));
+    showApp();
+  } catch(e) { showMsg(msg, 'Cannot connect to server. Is it running?', 'error'); }
+}
+
+async function handleRegister() {
+  const fields = {
+    user_name: document.getElementById('regUsername').value.trim(),
+    full_name: document.getElementById('regFullname').value.trim(),
+    email:     document.getElementById('regEmail').value.trim(),
+    password:  document.getElementById('regPassword').value,
+    gender:    document.getElementById('regGender').value,
+    date_of_birth: document.getElementById('regDob').value,
+    activity_level: document.getElementById('regActivity').value
+  };
+  const msg = document.getElementById('registerMsg');
+  if (!fields.user_name || !fields.email || !fields.password) return showMsg(msg, 'Fill required fields', 'error');
+  try {
+    const res  = await fetch(`${API}/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(fields) });
+    const data = await res.json();
+    if (!res.ok) return showMsg(msg, data.error, 'error');
+    token = data.token;
+    currentUser = { user_id: data.user_id, user_name: fields.user_name, full_name: fields.full_name, email: fields.email };
+    localStorage.setItem('nl_token', token);
+    localStorage.setItem('nl_user', JSON.stringify(currentUser));
+    showApp(true);
+  } catch(e) { showMsg(msg, 'Cannot connect to server', 'error'); }
+}
+
+function showApp(newUser=false) {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display  = 'block';
+  updateSidebar();
+  setDashDate();
+  startNotificationScheduler();
+  loadDashboard();
+  loadTodayLog();
+  loadMeasurements();
+  loadProfile();
+  // Admin section show/hide
+if (currentUser?.role === 'admin') {
+    document.getElementById('adminSection').style.display = 'block';
+}
+  // Show wizard for new users
+  if (newUser || !userGoal) {
+    setTimeout(() => document.getElementById('goalWizard').classList.add('show'), 600);
+  } else {
+    updateGoalUI();
+  }
+}
+
+function updateSidebar() {
+  if (!currentUser) return;
+  const name = currentUser.full_name || currentUser.user_name || '';
+  document.getElementById('sidebarName').textContent = name;
+  document.getElementById('sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+  if (userGoal) {
+    const labels = { lose:'🔥 Lose Weight', maintain:'⚖️ Maintain', gain:'💪 Gain Weight' };
+    document.getElementById('sidebarGoalBadge').textContent = labels[userGoal.type] || 'Goal Set';
+  }
+}
+
+function handleLogout() {
+  localStorage.clear();
+  token = null; currentUser = null; userGoal = null;
+  location.reload();
+}
+
+// ── WIZARD ────────────────────────────────────────────────
+function selectGoal(type) {
+  selectedGoalType = type;
+  document.querySelectorAll('.goal-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById(`goal-${type}`).classList.add('selected');
+  calcWizard();
+}
+
+function calcWizard() {
+  const weight = parseFloat(document.getElementById('wWeight').value);
+const feet = parseFloat(document.getElementById('wFeet').value) || 0;
+const inches = parseFloat(document.getElementById('wInches').value) || 0;
+const height = (feet * 30.48) + (inches * 2.54);
+  const age    = parseFloat(document.getElementById('wAge').value);
+  const gender = document.getElementById('wGender').value;
+
+  // Show ideal weight when height entered
+  const idealBox = document.getElementById('idealWeightBox');
+  if (height) {
+    const bmi_low  = 18.5, bmi_high = 24.9;
+    const h_m = height / 100;
+    const idealLow  = Math.round(bmi_low  * h_m * h_m);
+    const idealHigh = Math.round(bmi_high * h_m * h_m);
+    document.getElementById('idealWeightText').innerHTML =
+      `For your height of <b>${height} cm</b>, a healthy weight is:<br/>
+       <span class="iw-val">${idealLow} – ${idealHigh} kg</span><br/>
+       <small style="color:var(--muted);font-size:11px">(Based on BMI 18.5–24.9)</small>`;
+    idealBox.classList.add('show');
+  } else {
+    idealBox.classList.remove('show');
+  }
+
+  if (!weight || !height || !age || !selectedGoalType) return;
+
+  // BMR (Mifflin-St Jeor)
+  let bmr = gender === 'male'
+    ? 10*weight + 6.25*height - 5*age + 5
+    : 10*weight + 6.25*height - 5*age - 161;
+
+  // TDEE (moderate)
+  let tdee = bmr * 1.55;
+
+  // Calorie adjustment
+  const calMap = { lose: tdee - 500, maintain: tdee, gain: tdee + 300 };
+  const calories = Math.round(calMap[selectedGoalType]);
+  const protein  = Math.round(weight * 1.6);
+  const bmi      = (weight / ((height/100)**2)).toFixed(1);
+
+  document.getElementById('wr-cal').textContent     = calories;
+  document.getElementById('wr-protein').textContent = protein;
+  document.getElementById('wr-bmi').textContent     = bmi;
+  document.getElementById('wizardResult').classList.add('show');
+}
+
+
+ async function saveGoal() {
+  const weight = parseFloat(document.getElementById('wWeight').value);
+  const height = parseFloat(document.getElementById('wHeight').value);
+  const age    = parseFloat(document.getElementById('wAge').value);
+  if (!selectedGoalType) return showToast('Please select a goal first', 'error');
+  if (!weight || !height || !age) return showToast('Please fill weight, height and age', 'error');
+
+  const gender = document.getElementById('wGender').value;
+  let bmr = gender === 'male'
+    ? 10*weight + 6.25*height - 5*age + 5
+    : 10*weight + 6.25*height - 5*age - 161;
+  let tdee = bmr * 1.55;
+  const calMap = { lose: tdee - 500, maintain: tdee, gain: tdee + 300 };
+
+  userGoal = {
+    type: selectedGoalType,
+    calories: Math.round(calMap[selectedGoalType]),
+    protein:  Math.round(weight * 1.6),
+    carbs:    Math.round(calMap[selectedGoalType] * 0.45 / 4),
+    fat:      Math.round(calMap[selectedGoalType] * 0.25 / 9),
+    weight, height, age, gender
+  };
+
+  // Database mein save karo
+  try {
+    const res = await apiFetch('/save-goal', 'POST', {
+      goal_type: selectedGoalType,
+      target_calories: userGoal.calories,
+      target_protein: userGoal.protein,
+      weight_kg: weight,
+      height_cm: height
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error, 'error');
+  } catch(e) {
+    showToast('Could not save to server', 'error');
+  }
+
+  localStorage.setItem('nl_goal', JSON.stringify(userGoal));
+  document.getElementById('goalWizard').classList.remove('show');
+  updateSidebar();
+  updateGoalUI();
+  showNotif('🎯 Goal Set!', `Your daily target is ${userGoal.calories} kcal. Let\'s crush it!`, 'goal');
+  loadDashboard();
+}
+
+function skipWizard() {
+  document.getElementById('goalWizard').classList.remove('show');
+}
+
+function updateGoalUI() {
+  if (!userGoal) return;
+  const banner = document.getElementById('goalBanner');
+  const labels = { lose:'🔥 Lose Weight', maintain:'⚖️ Maintain Weight', gain:'💪 Gain Weight' };
+  const icons  = { lose:'🔥', maintain:'⚖️', gain:'💪' };
+  banner.style.display = 'flex';
+  document.getElementById('goalBannerIcon').textContent = icons[userGoal.type];
+  document.getElementById('goalBannerText').textContent = labels[userGoal.type];
+  document.getElementById('goalBannerSub').textContent  = `${userGoal.calories} kcal/day target`;
+  document.getElementById('goalStats').innerHTML = `
+    <div class="goal-stat"><div class="goal-stat-val">${userGoal.calories}</div><div class="goal-stat-label">Calories</div></div>
+    <div class="goal-stat"><div class="goal-stat-val">${userGoal.protein}g</div><div class="goal-stat-label">Protein</div></div>
+    <div class="goal-stat"><div class="goal-stat-val">${userGoal.fat}g</div><div class="goal-stat-label">Fat</div></div>
+  `;
+  document.getElementById('dashCalGoal').textContent  = `Goal: ${userGoal.calories} kcal`;
+  document.getElementById('dashProtGoal').textContent = `Goal: ${userGoal.protein} g`;
+
+  // Profile goal summary
+  document.getElementById('profGoalSummary').innerHTML = `
+    <div class="info-row"><span class="info-label">Goal</span><span class="info-val">${labels[userGoal.type]}</span></div>
+    <div class="info-row"><span class="info-label">Daily Calories</span><span class="info-val">${userGoal.calories} kcal</span></div>
+    <div class="info-row"><span class="info-label">Daily Protein</span><span class="info-val">${userGoal.protein} g</span></div>
+    <div class="info-row"><span class="info-label">Daily Carbs</span><span class="info-val">${userGoal.carbs} g</span></div>
+    <div class="info-row"><span class="info-label">Daily Fat</span><span class="info-val">${userGoal.fat} g</span></div>
+    <div class="info-row"><span class="info-label">Weight</span><span class="info-val">${userGoal.weight} kg</span></div>
+    <div class="info-row"><span class="info-label">Height</span><span class="info-val">${userGoal.height} cm</span></div>
+  `;
+}
+
+// ── DASHBOARD ──────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    // Nutrition summary
+    const res  = await apiFetch('/nutrition-summary');
+    const data = await res.json();
+    const cal   = Math.round(data.total_calories || 0);
+    const prot  = Math.round(data.total_protein  || 0);
+    const carbs = Math.round(data.total_carbs    || 0);
+    const fat   = Math.round(data.total_fat      || 0);
+
+    document.getElementById('dashCal').textContent    = cal;
+    document.getElementById('dashProt').textContent   = prot;
+    document.getElementById('dashCarbs').textContent  = carbs;
+    document.getElementById('dashFat').textContent    = fat;
+    document.getElementById('dashProtLeg').textContent= prot;
+    document.getElementById('macroKcal').textContent  = cal;
+
+    const goalCal  = userGoal?.calories || 2000;
+    const goalProt = userGoal?.protein  || 120;
+    const pctCal   = Math.min((cal/goalCal)*100, 100);
+    const pctProt  = Math.min((prot/goalProt)*100, 100);
+    document.getElementById('dashCalBar').style.width  = pctCal + '%';
+    document.getElementById('dashProtBar').style.width = pctProt + '%';
+
+    // Max for legend bars
+    const total = carbs + prot + fat || 1;
+    document.getElementById('carbsBar').style.width = (carbs/total*100)+'%';
+    document.getElementById('protBar').style.width  = (prot/total*100)+'%';
+    document.getElementById('fatBar').style.width   = (fat/total*100)+'%';
+
+    drawMacroChart(carbs, prot, fat);
+
+    // Calorie warning notification
+    if (cal > goalCal * 0.9 && cal < goalCal * 1.1) {
+      showNotif('🎯 Almost at your goal!', `You've consumed ${cal} kcal today. Goal: ${goalCal} kcal.`, 'goal');
+    } else if (cal > goalCal) {
+      showNotif('⚠️ Calorie Limit Exceeded', `You've exceeded your daily goal of ${goalCal} kcal by ${cal - goalCal} kcal.`, 'warn');
+    }
+  } catch(e) { console.warn('Dashboard load:', e.message); }
+
+  // Water
+  try {
+    const wres  = await apiFetch('/water-log');
+    const wdata = await wres.json();
+    const ml = wdata.total_ml || 0;
+    document.getElementById('dashWater').textContent = ml;
+    document.getElementById('dashWaterBar').style.width = Math.min((ml/2500)*100,100)+'%';
+    document.getElementById('waterBig').textContent = ml;
+    document.getElementById('waterProgress').style.width = Math.min((ml/2500)*100,100)+'%';
+  } catch(e) {}
+}
+
+// ── MACRO DONUT CHART (canvas) ─────────────────────────────
+function drawMacroChart(carbs, prot, fat) {
+  const canvas = document.getElementById('macroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 160, cx = 80, cy = 80, r = 65, lw = 22;
+  ctx.clearRect(0, 0, W, W);
+  const total = carbs + prot + fat;
+  if (total === 0) {
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle = '#e2ddd5'; ctx.lineWidth = lw; ctx.stroke();
+    return;
+  }
+  const slices = [
+    { val: carbs, color: '#e76f51' },
+    { val: prot,  color: '#52b788' },
+    { val: fat,   color: '#f4a261' },
+  ];
+  let angle = -Math.PI / 2;
+  slices.forEach(s => {
+    if (!s.val) return;
+    const sweep = (s.val / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, angle, angle + sweep);
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = lw;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    angle += sweep;
+  });
+}
+
+// ── TODAY'S LOG ────────────────────────────────────────────
+async function loadTodayLog() {
+  try {
+    const res   = await apiFetch('/daily-log');
+    const meals = await res.json();
+    document.getElementById('dashMeals').textContent = meals.length;
+
+    const mealIcons = { Breakfast:'🌅', Lunch:'☀️', Dinner:'🌙', Snack:'🍎', Meal:'🍽️' };
+
+    const renderList = (meals) => {
+      if (!meals.length) return '<div class="empty-state"><div class="empty-icon">🍽️</div><p>No meals yet today</p></div>';
+      return meals.map(m => {
+        const type = m.meal_type || 'Meal';
+        const icon = mealIcons[type] || '🍽️';
+        const time = m.meal_time ? m.meal_time.toString().slice(0, 5) : '';
+        const cal  = m.calories ? `${Math.round(m.calories)} kcal` : '';
+       return `
+  <div class="meal-item">
+    <div class="meal-dot">${icon}</div>
+    <div>
+      <div class="meal-name">${m.food_name || m.meal_name}</div>
+      <div class="meal-time">${type}${time ? ' · ' + time : ''}</div>
+    </div>
+    <div class="meal-macros">
+      <div class="meal-kcal">${cal}</div>
+      ${m.protein ? `<div>P: ${Math.round(m.protein)}g · C: ${Math.round(m.carbs)}g · F: ${Math.round(m.fat)}g</div>` : ''}
+    </div>
+    <button onclick="deleteMeal(${m.meal_id})" style="background:none;border:none;cursor:pointer;color:#ff4444;font-size:16px;margin-left:8px">🗑️</button>
+  </div>`;
+      }).join('');
+    };
+
+    document.getElementById('dashMealList').innerHTML  = renderList(meals);
+    document.getElementById('todayLogList').innerHTML  = renderList(meals);
+  } catch(e) {
+    document.getElementById('todayLogList').innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Could not load log</p></div>';
+  }
+}
+
+// ── LOG FOOD (inline search) ───────────────────────────────
+let logFoodDebounce = null;
+function onLogFoodType() {
+  const q = document.getElementById('logFoodSearch').value.trim();
+  clearTimeout(logFoodDebounce);
+  // Clear selection
+  clearFoodSelection();
+  if (q.length < 2) { document.getElementById('logFoodResults').classList.remove('show'); return; }
+  logFoodDebounce = setTimeout(() => fetchLogFoodResults(q), 400);
+}
+
+async function fetchLogFoodResults(q) {
+  if (q.length < 3) { 
+    document.getElementById('logFoodResults').classList.remove('show'); 
+    return; 
+}
+  const box = document.getElementById('logFoodResults');
+  box.innerHTML = '<div style="padding:12px 16px;font-size:12px;color:var(--muted)">Searching...</div>';
+  box.classList.add('show');
+  try {
+    const res = await apiFetch(`/search-food?query=${encodeURIComponent(q)}`);
+    const foods = await res.json();
+    if (!foods.length) {
+      box.innerHTML = '<div style="padding:12px 16px;font-size:12px;color:var(--muted)">No results found</div>';
+      return;
+    }
+    box.innerHTML = foods.map((f,i) => `
+      <div class="inline-result" onclick="selectLogFood(${i})">
+        <div class="inline-result-name">${f.food_name}</div>
+        <div class="inline-result-meta">${f.calories} kcal · P:${f.protein}g · C:${f.carbs}g · F:${f.fat}g · ${f.serving_size}</div>
+      </div>
+    `).join('');
+    box._foods = foods;
+  } catch(e) {
+    box.innerHTML = '<div style="padding:12px 16px;font-size:12px;color:var(--muted)">Server error</div>';
+  }
+}
+
+function selectLogFood(i) {
+  const box  = document.getElementById('logFoodResults');
+  const food = box._foods[i];
+  if (!food) return;
+
+  // Fill hidden inputs
+  document.getElementById('logFoodName').value = food.food_name;
+  document.getElementById('logCalories').value = food.calories;
+  document.getElementById('logProtein').value  = food.protein;
+  document.getElementById('logCarbs').value    = food.carbs;
+  document.getElementById('logFat').value      = food.fat;
+  document.getElementById('logFiber').value    = food.fiber;
+  document.getElementById('logSugar').value    = food.sugar;
+  document.getElementById('logSodium').value   = food.sodium;
+  document.getElementById('logServing').value  = food.serving_size;
+
+  // Show food info banner
+  document.getElementById('logFoodSearch').value = food.food_name;
+  document.getElementById('foodInfoName').textContent  = food.food_name;
+  document.getElementById('fib-cal').textContent   = food.calories;
+  document.getElementById('fib-prot').textContent  = food.protein;
+  document.getElementById('fib-carbs').textContent = food.carbs;
+  document.getElementById('fib-fat').textContent   = food.fat;
+  document.getElementById('foodInfoBanner').classList.add('show');
+
+  box.classList.remove('show');
+  document.getElementById('logFoodBtn').disabled = false;
+}
+
+function clearFoodSelection() {
+  document.getElementById('logFoodName').value = '';
+  document.getElementById('foodInfoBanner').classList.remove('show');
+  document.getElementById('logFoodBtn').disabled = true;
+}
+
+async function submitLogFood() {
+  const food_name = document.getElementById('logFoodName').value;
+  if (!food_name) return showToast('Please select a food first', 'error');
+  
+  // Button disable karo — double click rokne ke liye
+  const btn = document.getElementById('logFoodBtn');
+  btn.disabled = true;
+  btn.textContent = 'Logging...';
+
+  const body = {
+    food_name,
+    calories:   document.getElementById('logCalories').value,
+    protein:    document.getElementById('logProtein').value,
+    carbs:      document.getElementById('logCarbs').value,
+    fat:        document.getElementById('logFat').value,
+    fiber:      document.getElementById('logFiber').value,
+    sugar:      document.getElementById('logSugar').value,
+    sodium:     document.getElementById('logSodium').value,
+    serving_size: document.getElementById('logServing').value,
+    meal_type:  document.getElementById('logMealType').value
+  };
+  const msg = document.getElementById('logFoodMsg');
+  try {
+    const res  = await apiFetch('/log-food', 'POST', body);
+    const data = await res.json();
+    if (!res.ok) return showMsg(msg, data.error, 'error');
+    showMsg(msg, `✅ ${food_name} logged successfully!`, 'success');
+    showToast(`${food_name} logged! 🎉`);
+    // Reset
+    document.getElementById('logFoodSearch').value = '';
+    clearFoodSelection();
+    loadTodayLog();
+    loadDashboard();
+  } catch(e) { 
+    showMsg(msg, 'Server error', 'error');
+  } finally {
+    // Button wapas enable karo
+    btn.disabled = false;
+    btn.textContent = 'Log This Food →';
+  }
+}
+
+// ── SEARCH PAGE ────────────────────────────────────────────
+function setFilter(f, el) {
+  searchFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderSearchResults();
+}
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  const box = document.getElementById('searchResults');
+  box.innerHTML = '<div class="loading-state"><div class="spinner"></div><p style="margin-top:10px;font-size:12px">Fetching from USDA...</p></div>';
+  try {
+    const res   = await fetch(`${API}/search-food?query=${encodeURIComponent(q)}`);
+    allSearchResults = await res.json();
+    renderSearchResults();
+  } catch(e) { box.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Could not connect to server</p></div>'; }
+}
+
+function renderSearchResults() {
+  const box = document.getElementById('searchResults');
+  let foods = allSearchResults;
+  if (searchFilter !== 'all') foods = foods.filter(f => f.data_type && f.data_type.includes(searchFilter));
+  if (!foods.length) {
+    box.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><p>No results for this filter</p></div>';
+    return;
+  }
+  box.innerHTML = foods.map(f => `
+    <div class="food-result">
+      <h4>${f.food_name}</h4>
+      <div class="food-meta">
+        <span class="badge ${f.brand==='Generic'?'badge-generic':'badge-branded'}">${f.data_type || 'food'}</span>
+        ${f.brand !== 'Generic' ? `<span>${f.brand}</span>` : ''}
+        <span>Serving: ${f.serving_size}</span>
+      </div>
+      <div class="nutrient-row">
+        <div class="nutrient-pill"><div class="n-val cal">${f.calories}</div><div class="n-label">kcal</div></div>
+        <div class="nutrient-pill"><div class="n-val">${f.protein}</div><div class="n-label">Protein g</div></div>
+        <div class="nutrient-pill"><div class="n-val">${f.carbs}</div><div class="n-label">Carbs g</div></div>
+        <div class="nutrient-pill"><div class="n-val">${f.fat}</div><div class="n-label">Fat g</div></div>
+      </div>
+      ${f.fiber||f.sugar||f.sodium ? `
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+        ${f.fiber  ? `<span style="font-size:11px;color:var(--muted)">Fiber: ${f.fiber}g</span>` : ''}
+        ${f.sugar  ? `<span style="font-size:11px;color:var(--muted)">Sugar: ${f.sugar}g</span>` : ''}
+        ${f.sodium ? `<span style="font-size:11px;color:var(--muted)">Sodium: ${f.sodium}mg</span>` : ''}
+      </div>` : ''}
+     <button class="log-btn" onclick='this.disabled=true; prefillAndLog(${JSON.stringify(f)})'>+ Log This Food</button>
+  `).join('');
+}
+
+function prefillAndLog(food) {
+    // Pehle check karo already selected hai ya nahi
+    if (document.getElementById('logFoodName').value === food.food_name) return;
+    
+    navTo('logFood');
+    setTimeout(() => {
+        document.getElementById('logFoodSearch').value = food.food_name;
+        const box = document.getElementById('logFoodResults');
+        box._foods = [food];
+        selectLogFood(0);
+        showToast('Food selected — choose meal type and log!', 'info');
+    }, 300);
+}
+
+// ── WATER ──────────────────────────────────────────────────
+async function logWater(amount) {
+  const ml = amount || parseInt(document.getElementById('customWater').value);
+  const msg = document.getElementById('waterMsg');
+  if (!ml || ml <= 0) return showMsg(msg, 'Enter a valid amount', 'error');
+  try {
+    const res  = await apiFetch('/log-water', 'POST', { amount_ml: ml });
+    const data = await res.json();
+    if (!res.ok) return showMsg(msg, data.error, 'error');
+    showMsg(msg, `✅ ${ml}ml logged!`, 'success');
+    if (!amount) document.getElementById('customWater').value = '';
+    loadDashboard();
+  } catch(e) { showMsg(msg, 'Server error', 'error'); }
+}
+
+// ── MEASUREMENTS ───────────────────────────────────────────
+async function saveMeasurement() {
+  const weight = parseFloat(document.getElementById('mWeight').value);
+  const height = parseFloat(document.getElementById('mHeight').value);
+  const fat    = parseFloat(document.getElementById('mBodyFat').value) || null;
+  const msg    = document.getElementById('measMsg');
+  if (!weight || !height) return showMsg(msg, 'Weight and height required', 'error');
+
+  try {
+    const res  = await apiFetch('/measurements', 'POST', { weight_kg: weight, height_cm: height, body_fat_percent: fat });
+    const data = await res.json();
+    if (!res.ok) return showMsg(msg, data.error, 'error');
+    showMsg(msg, '✅ Saved!', 'success');
+    const bmi = parseFloat(data.bmi);
+    document.getElementById('bmiVal').textContent = bmi;
+    const cat = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal weight ✅' : bmi < 30 ? 'Overweight' : 'Obese';
+    document.getElementById('bmiCat').textContent = cat;
+    // Needle position: map BMI 15-40 → 0-100%
+    const pct = Math.min(Math.max(((bmi - 15) / 25) * 100, 0), 100);
+    document.getElementById('bmiNeedle').style.left = pct + '%';
+
+    // Ideal weight
+    const h_m = height / 100;
+    const idealLow  = Math.round(18.5 * h_m * h_m);
+    const idealHigh = Math.round(24.9 * h_m * h_m);
+    const box = document.getElementById('measIdealBox');
+    document.getElementById('measIdealText').innerHTML =
+      `Your ideal weight range for <b>${height}cm</b> height:<br/>
+       <span style="font-size:20px;font-weight:700;color:var(--blue);font-family:'Playfair Display',serif">${idealLow}–${idealHigh} kg</span><br/>
+       <small style="color:var(--muted);font-size:11px">Your current weight: ${weight}kg</small>`;
+    box.classList.add('show');
+
+    loadMeasurements();
+  } catch(e) { showMsg(msg, 'Server error', 'error'); }
+}
+
+async function loadMeasurements() {
+  try {
+    const res  = await apiFetch('/measurements');
+    const data = await res.json();
+    const box  = document.getElementById('measHistory');
+    if (!data.length) {
+      box.innerHTML = '<div class="empty-state"><div class="empty-icon">📏</div><p>No measurements yet</p></div>';
+      return;
+    }
+    box.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Weight</th><th>Height</th><th>BMI</th><th>Body Fat</th></tr></thead>
+        <tbody>
+          ${data.map(m => {
+            const bmi = m.height_cm ? (m.weight_kg / ((m.height_cm/100)**2)).toFixed(1) : '—';
+            return `<tr>
+              <td>${new Date(m.date).toLocaleDateString('en-PK')}</td>
+              <td>${m.weight_kg} kg</td>
+              <td>${m.height_cm} cm</td>
+              <td><b>${bmi}</b></td>
+              <td>${m.body_fat_percent ? m.body_fat_percent+'%' : '—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  } catch(e) {}
+}
+
+// ── PROFILE ────────────────────────────────────────────────
+async function loadProfile() {
+  try {
+    const res  = await apiFetch('/profile');
+    const data = await res.json();
+    const name = data.full_name || data.user_name;
+    document.getElementById('profAvatar').textContent   = name.charAt(0).toUpperCase();
+    document.getElementById('profName').textContent     = name;
+    document.getElementById('profEmail').textContent    = data.email;
+    document.getElementById('profUsername').textContent = data.user_name;
+    document.getElementById('profGender').textContent   = data.gender ? data.gender.charAt(0).toUpperCase() + data.gender.slice(1) : '—';
+    document.getElementById('profDob').textContent      = data.date_of_birth ? new Date(data.date_of_birth).toLocaleDateString('en-PK') : '—';
+    const actMap = { sedentary:'Sedentary', light:'Light', moderate:'Moderate', active:'Active', very_active:'Very Active' };
+    document.getElementById('profActivity').textContent = actMap[data.activity_level] || data.activity_level || '—';
+    document.getElementById('profSince').textContent    = data.created_at ? new Date(data.created_at).toLocaleDateString('en-PK',{year:'numeric',month:'long'}) : '—';
+  } catch(e) {}
+  updateGoalUI();
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────
+function navTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.toLowerCase().includes(page.toLowerCase().replace('logfood','log food').replace('search','search'))) {
+      n.classList.add('active');
+    }
+  });
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+  // Refresh on navigate
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'logFood')   loadTodayLog();
+  if (page === 'water')     loadDashboard();
+  if (page === 'admin')     loadAdminPanel();
+}
+
+// ── MOBILE SIDEBAR ──────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+
+// ── HELPERS ────────────────────────────────────────────────
+async function apiFetch(path, method='GET', body=null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(`${API}${path}`, opts);
+}
+
+function showMsg(el, text, type='success') {
+  el.textContent = text;
+  el.className   = `msg show ${type}`;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+async function loadAdminPanel() {
+    try {
+        const res = await apiFetch('/users');
+        const users = await res.json();
+        console.log('Admin users:', users);
+        if (!Array.isArray(users) || users.length === 0) {
+            document.getElementById('adminUserBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">No users found</td></tr>';
+            return;
+        }
+        document.getElementById('adminUserBody').innerHTML = users.map(u => `
+            <tr style="border-bottom:1px solid #eee">
+                <td style="padding:10px">${u.user_id}</td>
+                <td style="padding:10px">${u.user_name}</td>
+                <td style="padding:10px">${u.email}</td>
+                <td style="padding:10px">${u.full_name || 'N/A'}</td>
+                <td style="padding:10px">${u.gender || 'N/A'}</td>
+                <td style="padding:10px"><span style="background:#e8f5e9;padding:3px 8px;border-radius:10px">${u.role}</span></td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.log('Admin error:', e.message);
+        document.getElementById('adminUserBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">Error loading users</td></tr>';
+    }
+}
+function prefillAndLog(food) {
+    navTo('logFood');
+    setTimeout(() => {
+        document.getElementById('logFoodSearch').value = food.food_name;
+        const box = document.getElementById('logFoodResults');
+        box._foods = [food];
+        selectLogFood(0);
+        showToast('Food selected — choose meal type and log!', 'info');
+    }, 300);
+}
+</script>
+</body>
+</html>
