@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const USDA_API_KEY = 'i23RnBVrWm0JYKZJV9zpTEJ0mz4C2qbngPKUBqV6';
+const USDA_API_KEY = process.env.USDA_API_KEY;
 const PORT = 5050;
 
 // ─── DATABASE ─────────────────────────────────────────────────
@@ -375,15 +375,7 @@ app.get('/users', auth, adminAuth, (req, res) => {
         res.json(results);
     });
 });
-// ─── NUTRITION SUMMARY ────────────────────────────────────────
-app.get('/nutrition-summary', auth, (req, res) => {
-    const today = new Date().toISOString().split('T')[0];
-    const sql = `SELECT * FROM daily_nutrition_summary WHERE user_id = ? AND log_date = ?`;
-    db.query(sql, [req.user.user_id, today], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results[0] || { total_calories: 0, total_protein: 0, total_carbs: 0, total_fat: 0 });
-    });
-});
+
 // ─── DELETE MEAL ──────────────────────────────────────────────
 app.delete('/delete-meal/:meal_id', auth, (req, res) => {
     const { meal_id } = req.params;
